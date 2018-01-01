@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -30,6 +32,8 @@ public class AnagramDictionary {
     private static final int MAX_WORD_LENGTH = 7;
     private Random random = new Random();
     private ArrayList<String> wordList = new ArrayList<String>();
+    private HashSet<String> wordSet = new HashSet<String>();
+    private HashMap<String,ArrayList<String>> lettersToWords = new HashMap<String,ArrayList<String>>();
 
     public AnagramDictionary(Reader reader) throws IOException {
         BufferedReader in = new BufferedReader(reader);
@@ -37,6 +41,18 @@ public class AnagramDictionary {
         while((line = in.readLine()) != null) {
             String word = line.trim();
             wordList.add(word);
+            String sorted = new String(sortLetters(word));
+            wordSet.add(sorted);
+            if (lettersToWords.containsKey(sorted))
+            {
+                lettersToWords.get(sorted).add(word);
+            }
+            else
+            {
+                ArrayList<String> temp = new ArrayList<String>();
+                temp.add(word);
+                lettersToWords.put(sorted,temp);
+            }
         }
     }
 
@@ -53,14 +69,11 @@ public class AnagramDictionary {
 
     public List<String> getAnagrams(String targetWord) {
         ArrayList<String> result = new ArrayList<String>();
-        for (int i=0; i<wordList.size(); i++)
+        if(wordSet.contains(sortLetters(targetWord)))
         {
-            if (sortLetters(targetWord).equals(sortLetters(wordList.get(i))))
-            {
-                result.add(wordList.get(i));
-            }
+            return lettersToWords.get(sortLetters(targetWord));
         }
-        return result;
+        else return result;
     }
 
     public List<String> getAnagramsWithOneMoreLetter(String word) {
@@ -68,7 +81,10 @@ public class AnagramDictionary {
         return result;
     }
 
-    public String pickGoodStarterWord() {
-        return "skate";
+    public String pickGoodStarterWord()
+    {
+        Random rand = new Random();
+        int index = rand.nextInt(10001);
+        return wordList.get(index);
     }
 }
